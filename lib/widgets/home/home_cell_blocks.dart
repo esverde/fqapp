@@ -73,6 +73,7 @@ List<Map<String, dynamic>> _rankAlgos(HomeCell cell) {
     if (entry is! Map) continue;
     final name = (entry['rank_name'] ?? '').toString();
     if (name.isEmpty) continue;
+    if (name.contains('短剧') || name.contains('漫剧')) continue; // 墨卓精简版：同 RankTab.isDrama
     out.add(Map<String, dynamic>.from(entry));
   }
   return out;

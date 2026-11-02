@@ -246,7 +246,8 @@ class RankCatalog {
             );
           }
         }
-        tabs.add(RankTab(name: name, algo: algo, subCategories: subs));
+        final tab = RankTab(name: name, algo: algo, subCategories: subs);
+        if (!tab.isDrama) tabs.add(tab); // 墨卓精简版：不要短剧榜、漫剧榜
       }
     }
     final categories = <RankCategory>[];
@@ -292,7 +293,8 @@ class RankCatalog {
         final name = _string(entry['rank_name']);
         final algo = _int(entry['rank_algo'], fallback: -1);
         if (name.isEmpty || algo < 0) continue;
-        tabs.add(RankTab(name: name, algo: algo));
+        final tab = RankTab(name: name, algo: algo);
+        if (!tab.isDrama) tabs.add(tab); // 墨卓精简版：不要短剧榜、漫剧榜
       }
     }
     final categories = <RankCategory>[];

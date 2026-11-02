@@ -567,7 +567,7 @@ class _DetailPageState extends State<DetailPage> {
                 enabled: _supported && !_loading && _allChapters.isNotEmpty,
                 actionsEnabled: _supported && _isBook,
                 onRead: _openLastPosition,
-                onListen: _isBook ? _openListening : null,
+                onListen: null, // 墨卓精简版：不要听书
                 onDownload: _isBook ? _showDownloadSheet : null,
                 download: _isBook ? _downloadProgress : null,
               ),

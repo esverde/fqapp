@@ -243,7 +243,11 @@ class _ReaderAppearanceSheetState
         _fontSizeRow(),
         _backgroundRow(preset),
         if (_backgroundLocked) _backgroundLockNotice(preset),
-        ReaderTurnSettings(value: value, onChanged: updatePreferences),
+        ReaderTurnSettings(
+          value: value,
+          onChanged: updatePreferences,
+          eink: widget.einkOverride,
+        ),
         _spacingRow(),
         const ReaderSettingsDivider(),
         _actionsRow(),

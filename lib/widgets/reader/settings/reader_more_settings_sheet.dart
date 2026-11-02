@@ -86,8 +86,11 @@ class _ReaderMoreSettingsSheetState
   void _apply(ReaderPreferences Function(ReaderPreferences) change) =>
       updatePreferences(change(value));
 
+  // 全局墨水屏下翻页动画被强制关掉（einkEffectiveTurnStyle），开关照实显示
   bool get _noAnimation =>
-      value.pageTurnStyle == ReaderPageTurnStyle.none || value.instantSwipeTurn;
+      widget.einkOverride ||
+      value.pageTurnStyle == ReaderPageTurnStyle.none ||
+      value.instantSwipeTurn;
 
   void _setNoAnimation(bool enabled) {
     updatePreferences(
@@ -173,10 +176,7 @@ class _ReaderMoreSettingsSheetState
         ),
         if (widget.einkOverride || value.themePreset == ReaderThemePreset.eink)
           _einkRefreshRow(),
-        const ReaderSettingsDivider(),
-        _listeningSection(),
-        const ReaderSettingsDivider(),
-        ..._videoSettings(),
+        // 墨卓精简版：没有听书、改编剧两组
         const ReaderSettingsDivider(),
         ReaderSettingsNavRow(
           label: '正文替换',
@@ -187,22 +187,6 @@ class _ReaderMoreSettingsSheetState
       ],
     );
   }
-
-  List<Widget> _videoSettings() => [
-    const ReaderSettingsSectionHeader(title: '改编剧'),
-    ReaderSettingsSwitchRow(
-      label: '阅读器展示「看」悬浮球',
-      value: value.showVideoButton,
-      onChanged: (on) =>
-          _apply((current) => current.copyWith(showVideoButton: on)),
-    ),
-    ReaderSettingsSwitchRow(
-      label: '按阅读章节播放改编剧',
-      value: value.videoChapterSync,
-      onChanged: (on) =>
-          _apply((current) => current.copyWith(videoChapterSync: on)),
-    ),
-  ];
 
   Widget _listeningSection() => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,

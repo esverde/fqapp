@@ -125,7 +125,8 @@ extension _ReaderPageBuild on _ReaderPageState {
                                   ),
                                 ),
                                 const SizedBox(width: 16),
-                                Flexible(
+                                // 墨卓：Flexible 只占文字宽，textAlign.end 不起作用，章节名停在中线右边；改 Expanded 贴右
+                                Expanded(
                                   child: Text(
                                     _chapter.title,
                                     maxLines: 1,

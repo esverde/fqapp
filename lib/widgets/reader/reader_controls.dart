@@ -77,13 +77,7 @@ class ReaderControls extends StatelessWidget {
                           label: '目录',
                           onTap: onDirectory,
                         ),
-                        _Action(
-                          icon: preset.isDark
-                              ? LucideIcons.sun
-                              : LucideIcons.moon,
-                          label: preset.isDark ? '日间' : '夜间',
-                          onTap: onNight,
-                        ),
+                        // 墨卓精简版：墨水屏不要夜间
                         _Action(
                           key: const ValueKey('reader-settings'),
                           icon: LucideIcons.sliders_horizontal,

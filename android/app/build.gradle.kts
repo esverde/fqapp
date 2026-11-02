@@ -59,7 +59,8 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.fqapp.fqapp"
+        // 墨卓精简版：换包名，和官方版并存（签名不同，不能覆盖安装）
+        applicationId = "com.esverde.fqapp.eink"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

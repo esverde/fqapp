@@ -38,7 +38,7 @@ class SettingsPage extends StatelessWidget {
       SettingsCategory(
         icon: LucideIcons.palette,
         title: '外观',
-        subtitle: '主题模式、OLED 纯黑、播放页布局',
+        subtitle: '主题模式、墨水屏',
         // 用 builder 而不是固定 items：切到深色 / 切回浅色后，分类页重建
         // 时会重新判定，OLED 行不必退出重进就能出现或消失。
         // 播放页布局只在手机端有效（Windows 由 DesktopVideoChrome 承担）。
@@ -48,7 +48,6 @@ class SettingsPage extends StatelessWidget {
             systemBrightness: MediaQuery.platformBrightnessOf(context),
           ))
             _oledModeItem(),
-          if (!isWindowsDesktop) _playerLayoutItem(),
         ],
       ),
       SettingsCategory(
@@ -70,37 +69,9 @@ class SettingsPage extends StatelessWidget {
         ],
       ),
       SettingsCategory(
-        icon: LucideIcons.headphones,
-        title: '听书',
-        subtitle: '后台播放、通知栏控制与系统朗读',
-        items: [
-          _backgroundAudioItem(),
-          if (!isWindowsDesktop) _audioRateEngineItem(),
-          SettingsItem(
-            icon: LucideIcons.mic,
-            title: '系统朗读',
-            subtitle: '选择 TTS 引擎与语速，支持本地书',
-            onTap: (context, setState) => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SystemTtsSettingsPage()),
-            ),
-          ),
-        ],
-      ),
-      SettingsCategory(
-        icon: LucideIcons.film,
-        title: '短剧',
-        subtitle: '播放',
-        items: [
-          _muteWhenColdStartItem(),
-          if (!isWindowsDesktop) _floatingWindowItem(),
-          if (!isWindowsDesktop) _videoDecoderItem(),
-        ],
-      ),
-      SettingsCategory(
         icon: LucideIcons.database,
         title: '数据',
-        subtitle: '备份与恢复、缓存、阅读与播放历史',
+        subtitle: '备份与恢复、缓存、阅读历史',
         items: [
           SettingsItem(
             icon: LucideIcons.database,
@@ -118,15 +89,6 @@ class SettingsPage extends StatelessWidget {
             onTap: (context, setState) => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const CachedBooksPage()),
-            ),
-          ),
-          SettingsItem(
-            icon: LucideIcons.clapperboard,
-            title: '短剧离线缓存',
-            subtitle: '短剧下载、离线播放和清理缓存',
-            onTap: (context, setState) => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const CachedDramasPage()),
             ),
           ),
           _clearHistItem(),

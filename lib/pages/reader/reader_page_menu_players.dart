@@ -1,72 +1,9 @@
 part of '../reader_page.dart';
 
 extension _ReaderPageMenuPlayers on _ReaderPageState {
-  Widget _buildReaderMenuPlayers(
-    ReaderThemePreset preset,
-  ) => ReaderAudioBridge.buildMenuForBook(
-    context,
-    bookId: widget.bookId,
-    builder: (context, currentBook) {
-      final match = _videoMatch;
-      final video =
-          _preferences.showVideoButton && match != null && match.available;
-      final reducedMotion =
-          preset.isEink ||
-          MediaQuery.disableAnimationsOf(context) ||
-          MediaQuery.accessibleNavigationOf(context);
-      return Stack(
-        alignment: Alignment.bottomLeft,
-        children: [
-          ReaderListenCapsuleHost(monochrome: preset.isEink),
-          if (video)
-            Padding(
-              padding: const EdgeInsets.only(right: 16, bottom: 87),
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: ReaderVideoButton(
-                  menuVisibility: _controlsVisibility,
-                  preset: preset,
-                  cover: match.covers[match.seriesId] ?? '',
-                  loading: _openingVideo,
-                  onTap: _loading || _error != null
-                      ? null
-                      : () => unawaited(_openReaderVideo()),
-                ),
-              ),
-            ),
-          IgnorePointer(
-            ignoring: currentBook,
-            child: ExcludeSemantics(
-              excluding: currentBook,
-              child: AnimatedSwitcher(
-                duration: reducedMotion
-                    ? Duration.zero
-                    : const Duration(milliseconds: 250),
-                child: currentBook
-                    ? const SizedBox.shrink()
-                    : Padding(
-                        key: const ValueKey('reader-listen-entry'),
-                        padding: const EdgeInsets.only(right: 16, bottom: 20),
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: ReaderListenButton(
-                            preset: preset,
-                            loading: _openingListening,
-                            unavailable: _readerAudioUnavailable,
-                            onTap: _loading || _error != null
-                                ? null
-                                : () =>
-                                      unawaited(_openListening(fromPage: true)),
-                          ),
-                        ),
-                      ),
-              ),
-            ),
-          ),
-        ],
-      );
-    },
-  );
+  // 墨卓精简版：阅读菜单不放听书、看剧入口
+  Widget _buildReaderMenuPlayers(ReaderThemePreset preset) =>
+      const SizedBox.shrink();
 
   bool get _readerAudioUnavailable {
     final tones = _readerTones;
@@ -77,10 +14,7 @@ extension _ReaderPageMenuPlayers on _ReaderPageState {
         tones.narratorTones.isEmpty;
   }
 
-  void _loadReaderMenuData() {
-    unawaited(_loadVideoMatch());
-    unawaited(_loadReaderTones());
-  }
+  void _loadReaderMenuData() {} // 墨卓精简版：不查改编剧、不查听书音色
 
   Future<void> _loadReaderTones() async {
     if (widget.localOnly ||

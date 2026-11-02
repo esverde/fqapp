@@ -51,7 +51,7 @@ const _bookshelfLayoutPreference = 'bookshelf_layout';
 
 /// 顶栏一级 tab 的官方文案（amg.xml 的 SlidingTabLayout；顺序同官方
 /// 书架页：书架 / 历史 / 收藏）。官方还有「圈子」，本地无此功能不设。
-const _tabTitles = ['书架', '浏览历史', '收藏'];
+const _tabTitles = ['书架', '浏览历史']; // 墨卓精简版：「收藏」只放短剧、漫剧，去掉（下标 0、1 不变）
 
 /// 官方分工：书架 tab 只放书籍类，追剧 / 追漫的视频类只进「收藏」tab
 /// （与短剧页收藏频道同一批 [ShelfStore] 数据）。

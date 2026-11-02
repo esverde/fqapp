@@ -45,16 +45,26 @@ class _MineHeatmapState extends State<MineHeatmap> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // 墨卓：月份标在它那一列（第 0、8、15 列）的正上方。原来三个 Expanded 把整行三等分，
+              // 方格只有 16 × 14 宽、靠左，宽屏上标签和方格对不上。列宽照 _grid / _cell（14 + _gap）
               Row(
                 children: [
-                  for (final date in [dates.first, dates[56], dates.last])
-                    Expanded(
-                      child: Text(
-                        '${date.month}月',
-                        textAlign: TextAlign.center,
-                        style: labelStyle.copyWith(fontSize: 11),
-                      ),
+                  Opacity(opacity: 0, child: Text('周一', style: labelStyle)),
+                  const SizedBox(width: 6),
+                  for (var col = 0; col < 16; col++) ...[
+                    if (col > 0) const SizedBox(width: _gap),
+                    SizedBox(
+                      width: 14,
+                      child: col == 0 || col == 8 || col == 15
+                          ? Text(
+                              '${dates[col * 7].month}月',
+                              softWrap: false,
+                              overflow: TextOverflow.visible,
+                              style: labelStyle.copyWith(fontSize: 11),
+                            )
+                          : null,
                     ),
+                  ],
                 ],
               ),
               const SizedBox(height: 8),

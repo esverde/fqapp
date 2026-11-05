@@ -286,7 +286,8 @@ extension _ReaderPageBuild on _ReaderPageState {
                 ],
               ),
             ),
-            if (!widget.localOnly)
+            // 墨卓：书旗（localOnly，取章走它自己的 chapterLoader）也能批量缓存
+            if (!widget.localOnly || widget.bookId.startsWith('shuqi:'))
               ReaderCacheButton(preset: preset, onTap: _showCache),
             if (!_loading &&
                 _error == null &&

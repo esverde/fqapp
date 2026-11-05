@@ -1550,12 +1550,14 @@ Future<void> openBookDetail(
 }) async {
   // 书旗条目走自己的详情页：它的 bookId 是另一套命名空间，番茄的 DetailPage
   // 会拿这个 id 去查番茄接口，必然查不到。
-  if (isShuqiItem(item)) {
+  // 书旗阅读器里点「加入书架」存的是阅读器的 id `shuqi:<id>`，书架记录不带 source（墨卓 11-05 实测）
+  final shuqiShelf = item.id.startsWith('$shuqiSourceId:');
+  if (isShuqiItem(item) || shuqiShelf) {
     await Navigator.push(
       context,
       MaterialPageRoute<void>(
         builder: (_) => ShuqiDetailPage(
-          bookId: item.id,
+          bookId: shuqiShelf ? item.id.substring(shuqiSourceId.length + 1) : item.id,
           initialTitle: item.title,
           initialCover: item.cover,
         ),

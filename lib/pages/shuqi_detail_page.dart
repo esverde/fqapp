@@ -4,15 +4,17 @@ import 'package:flutter/material.dart';
 
 import '../models/shuqi_book.dart';
 import '../services/api_client.dart';
+import '../services/chapter_cache_store.dart';
 import '../services/library_store.dart';
+import '../services/reader_history.dart';
 import '../services/user_facing_error.dart';
 import 'reader_page.dart';
 
 /// 书旗书籍详情 + 目录。
 ///
-/// 这条链路是**只读**的：不写书架、不写阅读历史、不下载。阅读器以
-/// `localOnly: true` 打开，从而跳过番茄那套目录同步与磁盘缓存；阅读器内部
-/// 的进度/阅读时长写入则靠注入 [_ReadOnlyReaderStore] 丢弃。
+/// 阅读器以 `localOnly: true` 打开，跳过番茄那套目录同步、段评和章节刷新。
+/// 墨卓：进度 / 历史写进本机书架存储（[readerStore]），读过的章节写进章节缓存
+/// （[chapterCache]，取章时先查缓存，断网也能读已读过的章节），键都是 `shuqi:<id>`。
 ///
 /// 书旗 bookId 与番茄同为纯数字，所以在阅读器里加 `shuqi:` 前缀，避免两套 id
 /// 在同一条进度/缓存键上相撞。
@@ -27,6 +29,10 @@ class ShuqiDetailPage extends StatefulWidget {
   final Future<Map<String, dynamic>> Function(String bookId)? bookLoader;
   final Future<Map<String, dynamic>> Function(String bookId)? tocLoader;
 
+  /// 注入点：留空用本机书架存储、章节缓存。
+  final ReaderStore? readerStore;
+  final ChapterCache? chapterCache;
+
   const ShuqiDetailPage({
     super.key,
     required this.bookId,
@@ -34,6 +40,8 @@ class ShuqiDetailPage extends StatefulWidget {
     this.initialCover = '',
     this.bookLoader,
     this.tocLoader,
+    this.readerStore,
+    this.chapterCache,
   });
 
   @override
@@ -50,10 +58,34 @@ class _ShuqiDetailPageState extends State<ShuqiDetailPage> {
   bool _tocLoading = true;
   String? _tocError;
 
+  /// 上次读到的章节（历史里的 chapterId），有就「继续阅读」
+  String? _resumeChapterId;
+
+  String get _readerId => 'shuqi:${widget.bookId}';
+  ReaderStore get _store => widget.readerStore ?? LibraryStore.instance;
+
   @override
   void initState() {
     super.initState();
     unawaited(_load());
+    unawaited(_loadResume());
+  }
+
+  Future<void> _loadResume() async {
+    try {
+      final saved = await ReaderHistory(_store).load(_readerId);
+      final id = saved?['chapterId']?.toString();
+      if (mounted && id != null && id.isNotEmpty) {
+        setState(() => _resumeChapterId = id);
+      }
+    } catch (_) {
+      // 读不到历史就从第一章开始
+    }
+  }
+
+  int get _resumeIndex {
+    final i = _toc?.chapters.indexWhere((c) => c.chapterId == _resumeChapterId) ?? -1;
+    return i < 0 ? 0 : i;
   }
 
   Future<void> _load() async {
@@ -122,16 +154,21 @@ class _ShuqiDetailPageState extends State<ShuqiDetailPage> {
       context,
       MaterialPageRoute<void>(
         builder: (_) => ReaderPage(
-          bookId: 'shuqi:${widget.bookId}',
+          bookId: _readerId,
           title: book.name,
           cover: book.coverUrl,
           chapters: toc.toReaderChapters(),
           startIndex: start,
           localOnly: true,
-          // `localOnly` 只关掉目录同步与磁盘缓存；`_persistProgress` 仍会写
-          // 历史（kind=book, id=shuqi:<id>），污染本机历史与阅读统计。
-          readerStore: const _ReadOnlyReaderStore(),
+          readerStore: _store,
           chapterLoader: (chapter) async {
+            final cache = widget.chapterCache ?? ChapterCacheStore.instance;
+            try {
+              final hit = await cache.read(bookId: _readerId, chapterId: chapter.itemId);
+              if (hit != null && hit.trim().isNotEmpty) return hit;
+            } catch (_) {
+              // 缓存坏了照常联网取
+            }
             final payload = await ApiClient.instance.shuqiChapter(
               widget.bookId,
               chapter.itemId,
@@ -141,11 +178,14 @@ class _ShuqiDetailPageState extends State<ShuqiDetailPage> {
             if (text is! String || text.isEmpty) {
               throw StateError('这一章没有取到正文（${chapter.title}）');
             }
+            unawaited(cache
+                .write(bookId: _readerId, chapterId: chapter.itemId, title: chapter.title, text: text)
+                .catchError((_) {})); // 写不进缓存不影响阅读
             return text;
           },
         ),
       ),
-    );
+    );    if (mounted) unawaited(_loadResume()); // 回来时按钮跟上刚读到的章节
   }
 
   @override
@@ -273,8 +313,8 @@ class _ShuqiDetailPageState extends State<ShuqiDetailPage> {
                     FilledButton(
                       onPressed: chapters.isEmpty
                           ? null
-                          : () => _openChapter(0),
-                      child: const Text('开始阅读'),
+                          : () => _openChapter(_resumeIndex),
+                      child: Text(_resumeChapterId == null ? '开始阅读' : '继续阅读'),
                     ),
                   ],
                 ),
@@ -332,49 +372,4 @@ class _ShuqiDetailPageState extends State<ShuqiDetailPage> {
       ),
     );
   }
-}
-
-/// 只读阅读会话的存储：读取一律为空，写入一律丢弃。
-///
-/// 书旗是第三方只读源，`shuqi:<id>` 不该出现在本机历史、阅读统计或已看集合
-/// 里。`ReaderPage` 只有一个 [ReaderStore] 注入点，且进度保存不受 `localOnly`
-/// 控制，所以用这个空实现挡住 `_persistProgress` / `_settleReadTime` 的写入。
-class _ReadOnlyReaderStore implements ReaderStore {
-  const _ReadOnlyReaderStore();
-
-  @override
-  Future<Map<String, dynamic>?> historyEntry(String id) async => null;
-
-  @override
-  Future<void> addHistory(Map<String, dynamic> entry) async {}
-
-  @override
-  Future<void> updateProgress(
-    String id,
-    int episode,
-    double progress, {
-    String? chapterId,
-    double? position,
-    double? maxScroll,
-  }) async {}
-
-  @override
-  Future<void> accumulateReadTime(
-    String bookId,
-    String kind,
-    double seconds, {
-    DateTime? at,
-  }) async {}
-
-  @override
-  Future<Set<String>> watchedEpisodeIds(String id) async => const {};
-
-  @override
-  Future<void> markEpisodeWatched(
-    String id,
-    Iterable<String> episodeIds,
-  ) async {}
-
-  @override
-  Future<void> forgetWatchedEpisodes(String id) async {}
 }

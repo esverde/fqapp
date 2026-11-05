@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fqapp/pages/reader_page.dart';
 import 'package:fqapp/pages/shuqi_detail_page.dart';
 
+import 'support/fakes.dart';
+
 void main() {
   testWidgets('a toc failure keeps the book detail and offers a retry', (
     tester,
@@ -61,13 +63,28 @@ void main() {
     expect(find.text('共 1 章'), findsOneWidget);
   });
 
-  testWidgets('opening a chapter gives the reader a store that drops history', (
+  testWidgets('resumes from saved history and reads cached chapters', (
     tester,
   ) async {
+    // 墨卓：书旗也写进度、用章节缓存（键 shuqi:<id>）
+    final store = MemoryReaderStore(entry: {
+      'id': 'shuqi:34078',
+      'kind': 'book',
+      'chapterId': '2180323',
+    });
+    final cache = MemoryChapterCache();
+    await cache.write(
+      bookId: 'shuqi:34078',
+      chapterId: '2180323',
+      title: '第2章 青牛镇',
+      text: '缓存里的正文',
+    );
     await tester.pumpWidget(
       MaterialApp(
         home: ShuqiDetailPage(
           bookId: '34078',
+          readerStore: store,
+          chapterCache: cache,
           bookLoader: (_) async => {
             'data': {
               'bookId': '34078',
@@ -79,9 +96,10 @@ void main() {
           tocLoader: (_) async => {
             'data': {
               'path': 'h5',
-              'total': 1,
+              'total': 2,
               'chapters': [
                 {'chapterId': '2180322', 'title': '第1章 山边小村', 'isVip': false},
+                {'chapterId': '2180323', 'title': '第2章 青牛镇', 'isVip': false},
               ],
             },
           },
@@ -90,29 +108,20 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('开始阅读'));
+    await tester.tap(find.text('继续阅读'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
     final reader = tester.widget<ReaderPage>(find.byType(ReaderPage));
     expect(reader.localOnly, isTrue);
-    final store = reader.readerStore;
+    expect(reader.bookId, 'shuqi:34078');
+    expect(reader.startIndex, 1);
+    expect(identical(reader.readerStore, store), isTrue);
     expect(
-      store,
-      isNotNull,
-      reason: 'the reader must not fall back to the global history store',
+      await reader.chapterLoader!(reader.chapters[1]),
+      '缓存里的正文',
+      reason: 'a cached chapter must not hit the network',
     );
-
-    // ReaderPage 的 _persistProgress/_settleReadTime 会写这个 store；书旗是
-    // 只读源，所有写入必须被丢弃。
-    await store!.addHistory({
-      'id': 'shuqi:34078',
-      'kind': 'book',
-      'bookId': 'shuqi:34078',
-    });
-    await store.accumulateReadTime('shuqi:34078', 'book', 30);
-    await store.updateProgress('shuqi:34078', 0, 0.5);
-    expect(await store.historyEntry('shuqi:34078'), isNull);
 
     // 撤掉阅读器，别让还在跑的正文请求把 setState 带出测试。
     await tester.pumpWidget(const SizedBox.shrink());

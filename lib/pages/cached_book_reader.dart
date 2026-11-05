@@ -27,6 +27,8 @@ Future<bool> openRecentBook(
 }) async {
   final kind = item.kind;
   if ((kind != 'book' && kind != 'manga') || item.id.isEmpty) return false;
+  // 墨卓：书旗（shuqi:<id>）的目录和正文要走书旗接口，交给它自己的详情页续读
+  if (item.id.startsWith('shuqi:')) return false;
   final isManga = kind == 'manga';
   final store = cache ?? ChapterCacheStore.instance;
   final baseStore = readerStore ?? LibraryStore.instance;
@@ -239,6 +241,7 @@ Future<CachedBook?> cachedBookForOfflineOpen(
   if (item.kind != 'book' || item.id.isEmpty || connectivity.online) {
     return null;
   }
+  if (item.id.startsWith('shuqi:')) return null; // 同 openRecentBook
   CachedBook? catalogue;
   try {
     catalogue = await cache.cachedBook(item.id);

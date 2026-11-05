@@ -145,8 +145,8 @@ void main() {
 
     expect(calls, ['凡人']);
     expect(find.text('凡人修仙传'), findsOneWidget);
-    // 分类页签在书旗模式下不参与选中，数量仍是番茄那 6 个。
-    expect(find.byType(ChoiceChip), findsNWidgets(6));
+    // 分类页签在书旗模式下不参与选中，数量仍是番茄那几个（墨卓精简版只留综合、小说）。
+    expect(find.byType(ChoiceChip), findsNWidgets(2));
   });
 
   testWidgets('a restored rating filter does not hide shuqi results', (

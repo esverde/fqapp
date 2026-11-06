@@ -1,5 +1,7 @@
 package com.fqapp.fqapp
 
+import android.content.Intent
+import android.os.Bundle
 import android.view.KeyEvent
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -17,6 +19,15 @@ class MainActivity : FlutterActivity() {
 
     /** Read by the AI foreground-service bridge; a FGS may only start while this is true. */
     internal var isResumed = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // 墨卓适配版：不是墨卓就换成说明页。在 onCreate 里 finish，onStart 不会来，Dart（书城、后端）不会跑
+        if (!MoxuanGate.isMoxuan(this)) {
+            startActivity(Intent(this, NotMoxuanActivity::class.java))
+            finish()
+        }
+    }
 
     override fun getFlutterShellArgs(): FlutterShellArgs =
         super.getFlutterShellArgs().also {

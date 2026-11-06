@@ -26,6 +26,8 @@
             android:name=".FloatingVideoService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback"/>
+        <!-- 墨卓适配版：不是墨卓系统时的说明页（MoxuanGate） -->
+        <activity android:name=".NotMoxuanActivity" android:exported="false"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

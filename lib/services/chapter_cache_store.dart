@@ -5,6 +5,7 @@ import 'package:hive_ce/hive.dart';
 
 import '../models/media_item.dart';
 import 'chapter_cache_bytes.dart';
+import 'chapter_cache_isolate.dart';
 import 'encrypted_hive.dart';
 import 'secure_key_provider.dart';
 
@@ -129,7 +130,7 @@ class ChapterCacheStore implements ChapterCache {
     this.catalogTtl = const Duration(days: 30),
   }) : _hive = hive ?? Hive;
 
-  static final ChapterCacheStore instance = ChapterCacheStore();
+  static final ChapterCacheStore instance = IsolatedChapterCacheStore();
   static const _boxName = 'chapter_cache_v1';
 
   final HiveInterface _hive;

@@ -34,7 +34,7 @@ internal object RendererCompatibility {
         } else {
             ""
         }
-        // 墨卓（Kindle 上的安卓 7.1）：没有真 GPU，libagl 上白屏，SwiftShader 上弹层被底下的页面盖住；
+        // 墨卓（Kindle 上的安卓 8.1）：没有真 GPU（7.1 时实测 libagl 上白屏、SwiftShader 上弹层被底下的页面盖住）；
         // 一律走 CPU 软件渲染。带 "=1" 是为了绕过 FlutterLoader 的 release 名单（按参数名精确匹配），引擎只看开关在不在
         Log.i("FqRenderer", "policy=software reason=moxuan-eink device=" +
             isAffectedDevice(Build.HARDWARE, Build.BOARD, socModel))

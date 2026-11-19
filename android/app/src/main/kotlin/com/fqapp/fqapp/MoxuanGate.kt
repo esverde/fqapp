@@ -11,7 +11,7 @@ import android.widget.TextView
 import java.security.MessageDigest
 
 /**
- * 墨卓适配版只在墨卓（Kindle 上的安卓 7.1）里用：系统包 `android` 的签名证书必须是墨卓的 platform 证书。
+ * 墨卓适配版只在墨卓（Kindle 上的安卓 8.1，1.4.0 起；7.1 的 1.3.x 同一证书）里用：系统包 `android` 的签名证书必须是墨卓的 platform 证书。
  * 墨卓所有正式版（1.0.0 起，各型号）都用同一套私有密钥签名，所以不挑版本、机型；APK 自己的签名、包名不变，可以从旧版覆盖升级。
  * 只防直接把 APK 装到别的设备上；源码公开（GPL），改源码重编绕得过。
  */
@@ -25,7 +25,7 @@ internal object MoxuanGate {
     internal fun sha256Hex(bytes: ByteArray): String =
         MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
 
-    @Suppress("DEPRECATION") // GET_SIGNATURES：安卓 7 上只有这个
+    @Suppress("DEPRECATION") // GET_SIGNATURES：GET_SIGNING_CERTIFICATES 要安卓 9，墨卓 8.1 上只有这个
     fun isMoxuan(context: Context): Boolean = try {
         val info = context.packageManager.getPackageInfo("android", PackageManager.GET_SIGNATURES)
         matches(info.signatures?.map { it.toByteArray() }.orEmpty())

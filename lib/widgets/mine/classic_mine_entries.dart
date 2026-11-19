@@ -5,11 +5,9 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../pages/about_page.dart';
 import '../../pages/cached_books_page.dart';
-import '../../pages/cached_dramas_page.dart';
 import '../../pages/library_backup_page.dart';
 import '../home/home_design.dart';
 import '../home/home_shelf.dart';
-import '../home/home_sheet.dart';
 
 /// 我的 页底部的入口列表：离线缓存 / 备份与导入 / 关于。应用设置在标题栏齿轮。
 class ClassicMineEntries extends StatelessWidget {

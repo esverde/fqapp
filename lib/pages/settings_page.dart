@@ -74,8 +74,8 @@ class SettingsPage extends StatelessWidget {
         subtitle: isMediaDesktop
             ? '主题模式、OLED 纯黑'
             : HapticPreferences.supported
-            ? '主题模式、振动反馈、播放页布局'
-            : '主题模式、OLED 纯黑、播放页布局',
+            ? '主题模式、振动反馈、墨水屏'
+            : '主题模式、墨水屏',
         // 用 builder 而不是固定 items：切到深色 / 切回浅色后，分类页重建
         // 时会重新判定，OLED 行不必退出重进就能出现或消失。
         // 播放页布局只在手机端有效（Windows/Linux 由桌面播放器承担）。
@@ -86,7 +86,6 @@ class SettingsPage extends StatelessWidget {
             systemBrightness: MediaQuery.platformBrightnessOf(context),
           ))
             _oledModeItem(),
-          if (!isMediaDesktop) _playerLayoutItem(),
         ],
       ),
       SettingsCategory(
@@ -133,35 +132,7 @@ class SettingsPage extends StatelessWidget {
           ),
         ],
       ),
-      SettingsCategory(
-        icon: SettingsCategoryIcons.listening,
-        title: '听书',
-        subtitle: '后台播放、通知栏控制与系统朗读',
-        items: [
-          _backgroundAudioItem(),
-          if (!isMediaDesktop) _audioRateEngineItem(),
-          SettingsItem(
-            icon: CupertinoIcons.mic,
-            title: '系统朗读',
-            subtitle: '选择 TTS 引擎与语速，支持本地书',
-            onTap: (context, _) => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SystemTtsSettingsPage()),
-            ),
-          ),
-        ],
-      ),
-      if (!isLinuxDesktop)
-        SettingsCategory(
-          icon: SettingsCategoryIcons.drama,
-          title: '短剧',
-          subtitle: '播放',
-          items: [
-            _muteWhenColdStartItem(),
-            if (!isMediaDesktop) _floatingWindowItem(),
-            if (!isMediaDesktop) _videoDecoderItem(),
-          ],
-        ),
+      // 墨卓精简版：没有听书、短剧两组
       SettingsCategory(
         icon: SettingsCategoryIcons.data,
         title: '数据',
@@ -170,7 +141,7 @@ class SettingsPage extends StatelessWidget {
           SettingsItem(
             icon: Icons.sync,
             title: '多端同步',
-            subtitle: '仅同步番茄收藏、阅读播放记录和已看剧集',
+            subtitle: '仅同步番茄收藏和阅读记录',
             onTap: (context, _) => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const MultiDeviceSyncPage()),
@@ -192,15 +163,6 @@ class SettingsPage extends StatelessWidget {
             onTap: (context, _) => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const CachedBooksPage()),
-            ),
-          ),
-          SettingsItem(
-            icon: CupertinoIcons.play_rectangle,
-            title: '短剧离线缓存',
-            subtitle: isLinuxDesktop ? '管理已下载文件和下载任务' : '短剧下载、离线播放和清理缓存',
-            onTap: (context, _) => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const CachedDramasPage()),
             ),
           ),
           _clearHistItem(),

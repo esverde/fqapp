@@ -363,7 +363,10 @@ class _HomePageState extends ConsumerState<HomePage> {
   /// 2026-10-24 用户决定回退服务端 11 项方案——服务端表没有「短剧/漫剧」，
   /// 跨媒介入口只能本地给；点击身份由 `homeProvider` 的 `usesLocalTabs`
   /// 本地表驱动，与这里的下标一一对应。
-  List<HomeCategory> _categoriesOf(HomeState state) => homeCategories;
+  // 墨卓精简版：首页只留书（推荐、小说、短篇），短剧、漫剧、漫画、听书不显示；homeProvider 仍按原下标取数，这里换算
+  static const _shownTabs = [0, 1, 6];
+  List<HomeCategory> _categoriesOf(HomeState state) => [for (final i in _shownTabs) homeCategories[i]];
+  int _shownOf(int tab) => _shownTabs.contains(tab) ? _shownTabs.indexOf(tab) : 0;
 
   @override
   Widget build(BuildContext context) {
@@ -408,8 +411,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ValueListenableBuilder<double>(
                   valueListenable: _tabProgress,
                   builder: (context, progress, _) => HomeTabBar(
-                    selectedIndex: state.tabIndex,
-                    onSelect: _selectTab,
+                    selectedIndex: _shownOf(state.tabIndex),
+                    onSelect: (i) => _selectTab(_shownTabs[i]),
                     categories: categories,
                     progress: progress,
                   ),
@@ -427,9 +430,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                       });
                       return ClipRect(
                         child: TabSwipeArea.pages(
-                          index: state.tabIndex,
+                          index: _shownOf(state.tabIndex),
                           count: categories.length,
-                          onSelect: _selectTab,
+                          onSelect: (i) => _selectTab(_shownTabs[i]),
                           // The header lives outside the swipe area, so it
                           // cannot see the drag offset; this is how the
                           // underline learns to follow the finger.
@@ -439,7 +442,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                             }
                           },
                           pageBuilder: (context, target) =>
-                              _buildTabPage(target, gridWidth, textScale),
+                              _buildTabPage(_shownTabs[target], gridWidth, textScale),
                         ),
                       );
                     },

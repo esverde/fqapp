@@ -171,6 +171,7 @@ class ReaderControls extends StatelessWidget {
                                   label: aiLabel,
                                   onPressed: onAi,
                                 ),
+                              if (!preset.isEink) // 墨卓精简版：墨水屏下不要夜间
                               _DockAction(
                                 key: const ValueKey('reader-night-entry'),
                                 icon: preset.isDark

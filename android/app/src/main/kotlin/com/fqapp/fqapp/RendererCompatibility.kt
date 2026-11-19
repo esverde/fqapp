@@ -34,8 +34,10 @@ internal object RendererCompatibility {
         } else {
             ""
         }
-        val affected = isAffectedDevice(Build.HARDWARE, Build.BOARD, socModel)
-        if (!affected) return
+        // 墨卓（Kindle 上的安卓 7.1）：没有真 GPU，libagl 上白屏，SwiftShader 上弹层被底下的页面盖住；
+        // 一律走 CPU 软件渲染。带 "=1" 是为了绕过 FlutterLoader 的 release 名单（按参数名精确匹配），引擎只看开关在不在
+        Log.i("FqRenderer", "policy=software reason=moxuan-eink device=" +
+            isAffectedDevice(Build.HARDWARE, Build.BOARD, socModel))
 
         // FlutterShellArgs is a HashSet, so retaining contradictory values would
         // leave precedence to iteration order. Preserve every unrelated flag.
@@ -48,6 +50,6 @@ internal object RendererCompatibility {
         // In 3.44.6 release, ImpellerBackend alone does not force GLES. Opting out
         // of Impeller selects Skia/OpenGL ES; it does not disable hardware decode.
         args.add(FlutterShellArgs.ARG_DISABLE_IMPELLER)
-        Log.i("FqRenderer", "policy=skia-opengles reason=mt6895-or-dimensity8100")
+        args.add("--enable-software-rendering=1")
     }
 }

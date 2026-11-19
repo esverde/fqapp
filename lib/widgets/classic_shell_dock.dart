@@ -76,7 +76,6 @@ class _ClassicShellDockState extends State<ClassicShellDock> {
 
   static const _items = [
     (LucideIcons.house, '首页'),
-    (LucideIcons.clapperboard, '短剧'),
     (LucideIcons.library_big, '书架'),
     (LucideIcons.circle_user_round, '我的'),
   ];

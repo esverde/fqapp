@@ -36,10 +36,13 @@ class ShellDock extends StatelessWidget {
 
   static const _items = [
     GlassDockItem(CupertinoIcons.house, '首页'),
-    GlassDockItem(CupertinoIcons.play, '短剧', symbol: ArchiveSymbol.play),
     GlassDockItem(CupertinoIcons.book, '书架', symbol: ArchiveSymbol.shelf),
     GlassDockItem(CupertinoIcons.person_crop_circle, '我的'),
   ];
+
+  // 墨卓精简版底栏没有短剧：dock 上的位置 0/1/2 对应壳层页码 0（首页）/2（书架）/3（我的）
+  static int _toDock(int shell) => shell > 1 ? shell - 1 : shell;
+  static int _toShell(int dock) => dock >= 1 ? dock + 1 : dock;
 
   static const _lightweight = PerformancePreferences(
     enabled: true,
@@ -68,8 +71,8 @@ class ShellDock extends StatelessWidget {
   Widget _buildShell(BuildContext context) {
     if (AppStyleTokens.of(context).isClassic) {
       return ClassicShellDock(
-        selectedIndex: selectedIndex,
-        onSelected: onSelected,
+        selectedIndex: _toDock(selectedIndex),
+        onSelected: (i) => onSelected(_toShell(i)),
         overVideo: overVideo,
         animating: animating,
       );
@@ -168,10 +171,10 @@ class ShellDock extends StatelessWidget {
               ),
               child: GlassDock(
                 key: const ValueKey('liquid-dock'),
-                selectedIndex: selectedIndex,
+                selectedIndex: _toDock(selectedIndex),
                 reduceMotion: eink,
-                onSelected: onSelected,
-                onReselected: onSelected,
+                onSelected: (i) => onSelected(_toShell(i)),
+                onReselected: (i) => onSelected(_toShell(i)),
                 items: _items,
               ),
             ),

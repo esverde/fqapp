@@ -31,9 +31,9 @@ class MineEntries extends StatelessWidget {
         FeatureEntry(
           key: const ValueKey('mine-cache'),
           title: '离线缓存',
-          subtitle: '管理小说与短剧的离线内容',
+          subtitle: '管理小说的离线内容',
           icon: CupertinoIcons.tray_arrow_down,
-          onTap: () => _showCacheChoices(context),
+          onTap: () => _push(context, const CachedBooksPage()), // 墨卓精简版只有小说缓存
         ),
         SizedBox(height: style.entryGap),
         FeatureEntry(
@@ -61,39 +61,3 @@ class MineEntries extends StatelessWidget {
 void _push(BuildContext context, Widget page) =>
     Navigator.push(context, MaterialPageRoute<void>(builder: (_) => page));
 
-/// 小说与短剧使用两套缓存存储，入口仍先让用户选择要管理的类型。
-Future<void> _showCacheChoices(BuildContext context) async {
-  final style = AppStyleTokens.of(context);
-  await showHomeSheet<void>(
-    context: context,
-    title: '离线缓存',
-    contentPadding: EdgeInsets.fromLTRB(
-      style.pageGutter,
-      4,
-      style.pageGutter,
-      style.panelPadding,
-    ),
-    children: [
-      FeatureEntry(
-        title: '小说离线缓存',
-        subtitle: '离线续读、查看占用和清理缓存',
-        icon: CupertinoIcons.book,
-        onTap: () {
-          Navigator.pop(context);
-          _push(context, const CachedBooksPage());
-        },
-      ),
-      SizedBox(height: style.entryGap),
-      FeatureEntry(
-        title: '短剧离线缓存',
-        subtitle: '短剧下载、离线播放和清理缓存',
-        icon: CupertinoIcons.play_rectangle,
-        onTap: () {
-          Navigator.pop(context);
-          _push(context, const CachedDramasPage());
-        },
-      ),
-      const SizedBox(height: 8),
-    ],
-  );
-}

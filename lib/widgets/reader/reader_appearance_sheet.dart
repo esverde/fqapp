@@ -326,7 +326,7 @@ class _ReaderAppearanceSheetState
               _classicFontSizeRow(),
               _classicBackgroundRow(preset),
               if (_backgroundLocked) _classicBackgroundLockNotice(preset),
-              ReaderTurnSettings(value: value, onChanged: _apply),
+              ReaderTurnSettings(value: value, onChanged: _apply, eink: widget.einkOverride),
               _spacingRow(),
               const ReaderSettingsDivider(),
               _classicActionsRow(),
@@ -686,12 +686,7 @@ class _ReaderAppearanceSheetState
       value.pageMode == ReaderPageMode.scroll ? '滚动 · 跨章设置' : '翻页动画 · 自动翻页',
     ),
     if (widget.initialSection != ReaderSettingsSection.appearance) ...[
-      const ReaderSettingsCategory(
-        'listening',
-        '听书',
-        CupertinoIcons.headphones,
-        '跟随翻页 · 朗读高亮',
-      ),
+      // 墨卓精简版：没有听书
       ReaderSettingsCategory(
         'operations',
         '操作',
@@ -794,13 +789,13 @@ class _ReaderAppearanceSheetState
       _behavior(ReaderBehaviorCategory.theme),
     ],
     'turn' => [
-      _adjustment(ReaderTurnSettings(value: value, onChanged: _apply)),
+      _adjustment(ReaderTurnSettings(value: value, onChanged: _apply, eink: widget.einkOverride)),
       _autoTurn(),
       _behavior(ReaderBehaviorCategory.turn),
     ],
     'listening' => [_behavior(ReaderBehaviorCategory.listening)],
     _ => [
-      _adjustment(ReaderTurnSettings(value: value, onChanged: _apply)),
+      _adjustment(ReaderTurnSettings(value: value, onChanged: _apply, eink: widget.einkOverride)),
       _autoTurn(),
       _behavior(ReaderBehaviorCategory.operations),
     ],

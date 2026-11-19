@@ -26,7 +26,7 @@ class ClassicMineEntries extends StatelessWidget {
           ClassicMineEntryRow(
             icon: LucideIcons.hard_drive_download,
             label: '离线缓存',
-            onTap: () => _showCacheChoices(context),
+            onTap: () => _push(context, const CachedBooksPage()), // 墨卓精简版只有小说缓存
           ),
           ClassicMineEntryRow(
             icon: LucideIcons.archive_restore,
@@ -46,34 +46,6 @@ class ClassicMineEntries extends StatelessWidget {
 
 void _push(BuildContext context, Widget page) =>
     Navigator.push(context, MaterialPageRoute<void>(builder: (_) => page));
-
-/// 小说离线缓存和短剧离线缓存是两套存储，各自有管理页；这里只做分流。
-Future<void> _showCacheChoices(BuildContext context) async {
-  await showHomeSheet<void>(
-    context: context,
-    title: '离线缓存',
-    contentPadding: EdgeInsets.zero,
-    children: [
-      ClassicMineEntryRow(
-        icon: LucideIcons.book_open,
-        label: '小说离线缓存',
-        onTap: () {
-          Navigator.pop(context);
-          _push(context, const CachedBooksPage());
-        },
-      ),
-      ClassicMineEntryRow(
-        icon: LucideIcons.clapperboard,
-        label: '短剧离线缓存',
-        onTap: () {
-          Navigator.pop(context);
-          _push(context, const CachedDramasPage());
-        },
-      ),
-      const SizedBox(height: 8),
-    ],
-  );
-}
 
 class ClassicMineEntryRow extends StatelessWidget {
   final IconData icon;

@@ -10,9 +10,13 @@ class ReaderTurnSettings extends StatelessWidget {
     super.key,
     required this.value,
     required this.onChanged,
+    this.eink = false,
   });
 
   final ReaderPreferences value;
+
+  /// 全局墨水屏：翻页动画被强制关掉（einkEffectiveTurnStyle），分页时总是显示「无」
+  final bool eink;
   final ValueChanged<ReaderPreferences> onChanged;
 
   @override
@@ -30,14 +34,30 @@ class ReaderTurnSettings extends StatelessWidget {
   );
 
   Widget _turnRow() {
-    final paged =
-        value.pageMode == ReaderPageMode.paged && !value.instantSwipeTurn;
+    final pagedMode = value.pageMode == ReaderPageMode.paged;
+    final none = pagedMode &&
+        (eink ||
+            value.instantSwipeTurn ||
+            value.pageTurnStyle == ReaderPageTurnStyle.none);
     bool style(ReaderPageTurnStyle style) =>
-        paged && value.pageTurnStyle == style;
+        pagedMode && !none && value.pageTurnStyle == style;
     return ReaderSettingsRow(
       label: '翻页',
       child: ReaderSettingsChipRow(
         children: [
+          // 墨卓：无动画翻页放回首屏（同「更多设置」的无动画翻页开关）
+          ReaderSettingsChip(
+            key: const ValueKey('reader-turn-none'),
+            label: '无',
+            selected: none,
+            onTap: () => onChanged(
+              value.copyWith(
+                pageMode: ReaderPageMode.paged,
+                pageTurnStyle: ReaderPageTurnStyle.none,
+                instantSwipeTurn: true,
+              ),
+            ),
+          ),
           ReaderSettingsChip(
             key: const ValueKey('reader-turn-curl'),
             label: '仿真',

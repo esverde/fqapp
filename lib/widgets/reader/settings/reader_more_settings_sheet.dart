@@ -110,8 +110,11 @@ class _ReaderMoreSettingsSheetState
     widget.onChanged(next.normalized());
   }
 
+  // 全局墨水屏下翻页动画被强制关掉（einkEffectiveTurnStyle），开关照实显示
   bool get _noAnimation =>
-      value.pageTurnStyle == ReaderPageTurnStyle.none || value.instantSwipeTurn;
+      widget.einkOverride ||
+      value.pageTurnStyle == ReaderPageTurnStyle.none ||
+      value.instantSwipeTurn;
 
   void _setNoAnimation(bool enabled) {
     commitPreferences(
@@ -237,15 +240,8 @@ class _ReaderMoreSettingsSheetState
       if (_shows(ReaderBehaviorCategory.theme) &&
           (widget.einkOverride || value.themePreset == ReaderThemePreset.eink))
         _einkRefreshRow(),
-      if (_shows(ReaderBehaviorCategory.listening)) ...[
-        if (_compactForm) const ReaderSettingsDivider(),
-        _listeningSection(),
-      ],
+      // 墨卓精简版：没有听书、改编剧两组
       if (_shows(ReaderBehaviorCategory.operations)) ...[
-        if (!isLinuxDesktop) ...[
-          const ReaderSettingsDivider(),
-          ..._videoSettings(),
-        ],
         const ReaderSettingsDivider(),
         ReaderSettingsNavRow(
           label: '正文替换',

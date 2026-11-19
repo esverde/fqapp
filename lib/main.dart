@@ -193,18 +193,6 @@ Future<void> _loadLocalData() async {
     // 打不开时页面退化为「全部 / 默认版式」而不是拖住启动。
     optional(ShelfGroupStore.instance.init),
     optional(ShelfViewStore.instance.load),
-    // 短剧 feed 的 点赞 也是可选本地数据，与书架同一处理：开箱失败不能让
-    // 启动失败，否则一个纯装饰性的集合会拖住短剧页之外的所有功能。
-    optional(() async {
-      await DiggStore.instance.init();
-      // DiggStore 自己把「不可用」当成「没有点赞」处理（见 _openBox）。
-    }),
-    // 「上滑查看更多视频」的一次性标记同样是可选数据：读不到就当没弹过，
-    // 弹一次的语义退化成「本次启动弹一次」也不能拖住启动。
-    optional(() async {
-      await SwipeGuideStore.instance.init();
-      // SwipeGuideStore 自己把「不可用」当成「未显示」处理。
-    }),
     // 首页 feed 的冷启动缓存也是可选数据：打不开就当没有缓存，
     // 首页退化为先加载再显示，其余行为不变。
     optional(() async {
@@ -218,20 +206,6 @@ Future<void> _loadLocalData() async {
       await RankCache.instance.warmUp();
       // RankCache 自己把「不可用」当成「没有缓存」处理。
     }),
-    // 官方播放页开关（PlayerBottomStyleConfig / 清屏反转 / 横屏锁）随同一份
-    // 运行时配置读取；读不到就用默认值，不能拖住启动。
-    PlayerStyleConfig.load(),
-    // 官方播放页字号档（jk3/b 的 SP）同理：读失败回标准档，不拖启动。
-    ShortSeriesFontScale.load(),
-    // 解码器偏好必须先进内存：`NativePlayer.create` 在起播路径上直接读它，
-    // 不能在那里再 await 读盘（见 DecoderPreferenceCache 的说明）。
-    optional(DecoderPreferenceCache.load),
-    // 离线缓存的记录箱启动即打开：播放器的离线命中只在 box 就绪时才查
-    // （避免运行中途首次 openBox 失败产生游离异步错误）。可选数据，失败
-    // 只退化为「本会话不查离线」。
-    optional(HiveDramaDownloadStore.instance.warmUp),
-    // 听书音频离线记录箱：与短剧箱分开，同样只在就绪时才查离线命中。
-    optional(HiveAudioDownloadStore.instance.warmUp),
     // AI 设置/缓存/反馈箱：失败只让 AI 功能退化，不能拖住阅读。
     optional(AiReadingController.instance.init),
     // 主题样式与 SharedPreferences 一并并行：两者都是启动链上的必要项，
@@ -246,32 +220,6 @@ Future<void> _loadLocalData() async {
       await sync.initialize();
     }),
   );
-  // 听书后台播放开关：异步读取 SharedPreferences，失败退化为默认开启。
-  unawaited(AudioPreferences.instance.load());
-  // 短剧「边看边往后缓存」的开关与集数：同一条装配链里读，避免播放页
-  // 起来时还没加载完、拿默认值把用户关掉的开关又打开。
-  unawaited(DramaCachePreferences.instance.load());
-  // 短剧切后台悬浮窗开关（#24）：异步读取，失败退化为默认关闭。
-  unawaited(PlayerPreferences.loadFloatingWindow());
-  // 离线缓存的网络门（官方 onNetChangeCheck）：断网/只剩计费链路时
-  // 自动暂停下载队列，半成品保留。监听失败只退化为「无自动暂停」。
-  try {
-    Connectivity().onConnectivityChanged.listen((results) {
-      final view = foldConnectivity(results);
-      DramaDownloader.instance.updateConnectivity(
-        online: view.online,
-        metered: view.metered,
-      );
-      AudioDownloader.instance.updateConnectivity(
-        online: view.online,
-        metered: view.metered,
-      );
-    });
-  } catch (_) {
-    // 监听连通性只为自动暂停下载；拿不到不构成启动失败，但值得留一条记录，
-    // 否则「断网没自动暂停」会被当成下载器自己的 bug。
-    AppLog.w('startup', '连通性监听注册失败，自动暂停下载不可用');
-  }
   // 海报缓存的字节预算清扫：超额时删最旧的图。失败不影响任何页面。
   unawaited(PosterCache.instance.enforceBudget());
   // 小米澎湃 OS 公平运行内存：注册 TRIM/KILL 通道回调。必须在启动时构造，
@@ -285,17 +233,9 @@ Future<void> _loadLocalData() async {
     savedTheme is String ? savedTheme : null,
   );
   // 墨水屏模式与深色模式同为可选偏好：读不到退化为关闭，不拖住启动。
-  einkModeNotifier.value = sp.getBool(einkModeKey) ?? false;
+  einkModeNotifier.value = sp.getBool(einkModeKey) ?? true; // 墨卓精简版默认墨水屏
   // OLED 纯黑与墨水屏互斥；两个旧值同时为 true 时墨水屏优先。
   oledModeNotifier.value = sp.getBool(oledModeKey) ?? false;
-  // 播放页布局（短剧上下分屏/左右分栏）同样是可选偏好：读不到退化为
-  // 沉浸式，不阻塞启动。
-  PlayerLayoutPreferences.mode.value = PlayerLayoutPreferences.decode(
-    sp.getString(PlayerLayoutPreferences.key),
-  );
-  // 短剧分区上次停在哪个频道（官方 SP `last_tab_type`）：同样只读一次，
-  // 页面在 initState 同步取用，首帧不会先闪「推荐」。
-  DramaChannelPreferences.load(sp);
 }
 
 class FqApp extends StatefulWidget {
@@ -788,7 +728,7 @@ class _RootShellState extends State<RootShell> with TickerProviderStateMixin {
         // 切到短剧 tab。
         return LibraryPage(
           onBrowse: () => _selectTab(0),
-          onFindDrama: () => _selectTab(1),
+          onFindDrama: () => _selectTab(0), // 墨卓精简版没有短剧 tab
         );
       default:
         return const MinePage();
@@ -964,7 +904,8 @@ class _RootShellState extends State<RootShell> with TickerProviderStateMixin {
     // 留一条突兀的黑带；短剧只有视频流（推荐）背后是视频，仍用黑。
     final lightSystemIcons = dramaOnVideo || isDark;
     return Scaffold(
-      extendBody: true,
+      // 墨水屏：页面不画到底栏后面（圆角外露出的页面在墨水屏上是灰色残影）
+      extendBody: !einkModeNotifier.value,
       // 状态栏图标亮度挂在壳层、按选中 tab 切换：短剧页是黑底视频流（官方
       // SeriesMallFragment 的透明顶栏直接压在 feed 上），深色图标在黑底上
       // 整条状态栏都看不见，必须浅色；其余三页浅色底用深色。样式放壳层而不是

@@ -225,7 +225,7 @@ class _LocalIdentityPanel extends StatelessWidget {
                 ),
                 const SizedBox(height: 7),
                 Text(
-                  '本地阅读档案 · 小说、短剧、漫画与听书',
+                  '本地阅读档案 · 小说',
                   style: TextStyle(
                     fontSize: 12,
                     height: 1.6,

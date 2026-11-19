@@ -383,6 +383,7 @@ class _ReaderBookPanelState extends State<ReaderBookPanel> {
                                 onAi,
                                 key: const ValueKey('reader-book-ai'),
                               ),
+                            if (!preset.isEink) // 墨卓精简版：墨水屏下不要夜间
                             _bottom(
                               preset.isDark ? '日间' : '夜间',
                               preset.isDark

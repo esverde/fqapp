@@ -25,7 +25,7 @@ Future<void> primeAppearance({AppThemeStyleStore? styleStore}) async {
     themeModeNotifier.value = themeModeFromName(
       savedTheme is String ? savedTheme : null,
     );
-    einkModeNotifier.value = sp.getBool(einkModeKey) ?? false;
+    einkModeNotifier.value = sp.getBool(einkModeKey) ?? true; // 墨卓精简版默认墨水屏
     oledModeNotifier.value = sp.getBool(oledModeKey) ?? false;
   } catch (_) {
     // 读不到就沿用初值，行为与预热前一致。

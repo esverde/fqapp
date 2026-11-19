@@ -8,6 +8,7 @@ extension _ReaderPageVideo on _ReaderPageState {
   }
 
   Future<void> _loadVideoMatch() async {
+    if (true) return; // 墨卓精简版：不查改编剧
     if (widget.localOnly ||
         widget.chapters.isEmpty ||
         !_preferencesReady ||

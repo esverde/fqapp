@@ -371,6 +371,7 @@ class _ReaderClassicControlsState extends State<ReaderClassicControls> {
             onTap: widget.onAi,
           ),
         ),
+      if (!widget.preset.isEink) // 墨卓精简版：墨水屏下不要夜间
       Expanded(
         child: _ClassicAction(
           key: const ValueKey('reader-night-entry'),

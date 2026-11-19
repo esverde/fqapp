@@ -686,7 +686,12 @@ class _ReaderAppearanceSheetState
       value.pageMode == ReaderPageMode.scroll ? '滚动 · 跨章设置' : '翻页动画 · 自动翻页',
     ),
     if (widget.initialSection != ReaderSettingsSection.appearance) ...[
-      // 墨卓精简版：没有听书
+      const ReaderSettingsCategory(
+        'listening',
+        '听书',
+        CupertinoIcons.headphones,
+        '跟随翻页 · 朗读高亮',
+      ),
       ReaderSettingsCategory(
         'operations',
         '操作',

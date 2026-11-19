@@ -706,7 +706,7 @@ class _DetailPageState extends State<DetailPage> {
               ),
             ),
           ),
-        if (false) // 墨卓精简版：不要听书
+        if (_isBook)
           GlassIconButton(
             key: const Key('detail_action_听书'),
             icon: CupertinoIcons.headphones,

@@ -363,8 +363,8 @@ class _HomePageState extends ConsumerState<HomePage> {
   /// 2026-10-24 用户决定回退服务端 11 项方案——服务端表没有「短剧/漫剧」，
   /// 跨媒介入口只能本地给；点击身份由 `homeProvider` 的 `usesLocalTabs`
   /// 本地表驱动，与这里的下标一一对应。
-  // 墨卓精简版：首页只留书（推荐、小说、短篇），短剧、漫剧、漫画、听书不显示；homeProvider 仍按原下标取数，这里换算
-  static const _shownTabs = [0, 1, 6];
+  // 墨卓精简版：首页只留书和听书（推荐、小说、听书、短篇），短剧、漫剧、漫画不显示；homeProvider 仍按原下标取数，这里换算
+  static const _shownTabs = [0, 1, 5, 6];
   List<HomeCategory> _categoriesOf(HomeState state) => [for (final i in _shownTabs) homeCategories[i]];
   int _shownOf(int tab) => _shownTabs.contains(tab) ? _shownTabs.indexOf(tab) : 0;
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 # 墨卓适配版的出包脚本（非官方修改版）。路径是维护者本机的：W=源码所在目录，K=墨卓签名密钥（不公开，自己打包换成自己的），环境由 mozhuo_env.sh 装。
-# 什锦铺墨卓版：KPW6-AOSP 上 builder 身份跑。源码从 Windows 的 local/apps/fqapp 同步到 /home/builder/fqapp/src（/mnt/d 上编太慢），
+# 什锦铺墨卓版：KPW6-OREO 上 builder 身份跑。源码从 Windows 的 local/apps/fqapp 同步到 /home/builder/fqapp/src（/mnt/d 上编太慢），
 # 编 armv7 release（未签名），再用墨卓 releasekey 签名，产物放 local/apps/fqapp-eink/。环境见 mozhuo_env.sh
 set -e
 export LC_ALL=C.UTF-8   # 输出文件名带中文；18.04 默认 POSIX locale 会写成乱码

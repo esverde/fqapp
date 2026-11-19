@@ -1,7 +1,7 @@
 #!/bin/bash
-# 墨卓适配版的编译环境（Ubuntu 18.04 WSL）：Flutter 3.44.6、JDK 17、Android SDK + NDK 28.2、Rust armv7，装到 /home/builder/fqapp。
-# 什锦铺（fqapp）构建环境：装在 KPW6-AOSP 的 /home/builder/fqapp/，builder 身份跑。与 AOSP 的 out/、stage 无关。
-# 版本照仓库 .github/workflows/android-apk.yml：Flutter 3.44.6、NDK 28.2.13676358、CMake 3.22.1、JDK 17
+# 墨卓适配版的编译环境（Ubuntu 18.04 WSL）：Flutter 3.50.0、JDK 17、Android SDK + NDK 28.2、Rust armv7，装到 /home/builder/fqapp。
+# 什锦铺（fqapp）构建环境：装在 KPW6-OREO 的 /home/builder/fqapp/，builder 身份跑。与 AOSP 的 out/、stage 无关。
+# 版本照仓库 .github/workflows/android-apk.yml：Flutter 3.50.0、NDK 28.2.13676358、CMake 3.22.1、JDK 17
 set -e
 E=/home/builder/fqapp
 mkdir -p $E && cd $E
@@ -9,8 +9,10 @@ if [ ! -x jdk/bin/java ]; then
   curl -fL -o jdk.tgz "https://api.adoptium.net/v3/binary/latest/17/ga/linux/x64/jdk/hotspot/normal/eclipse"
   mkdir -p jdk && tar xzf jdk.tgz -C jdk --strip-components=1 && rm jdk.tgz
 fi
-if [ ! -x flutter/bin/flutter ]; then
-  curl -fL -o flutter.tar.xz "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.44.6-stable.tar.xz"
+F=3.50.0
+if ! grep -qs "^$F" flutter/version && ! grep -qs "\"frameworkVersion\": \"$F\"" flutter/bin/cache/flutter.version.json; then
+  [ -d flutter ] && mv flutter flutter-old-$(date +%Y%m%d)   # 旧版本改名留着（旧 tag 要用）
+  curl -fL -o flutter.tar.xz "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.50.0-stable.tar.xz"
   tar xJf flutter.tar.xz && rm flutter.tar.xz
 fi
 export JAVA_HOME=$E/jdk ANDROID_HOME=$E/sdk PATH=$E/jdk/bin:$E/flutter/bin:$E/sdk/cmdline-tools/latest/bin:$HOME/.cargo/bin:$PATH
@@ -23,6 +25,7 @@ sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;28.
 if ! command -v rustup >/dev/null; then
   curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
 fi
+rustup toolchain install 1.99.1 --profile minimal && rustup default 1.99.1   # 照上游 CI 钉的版本
 rustup target add armv7-linux-androideabi aarch64-linux-android
 flutter config --no-analytics --android-sdk $E/sdk
 flutter --version

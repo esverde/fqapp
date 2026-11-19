@@ -196,9 +196,9 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   static const _paginationThreshold = 480.0;
-  // 墨卓精简版：只留综合、小说；综合里也不出短剧、漫剧、漫画、听书
-  static const _categories = [SearchCategory.general, SearchCategory.book];
-  static const _droppedKinds = {'video', 'manju', 'manga', 'audio'};
+  // 墨卓精简版：只留综合、小说、听书；综合里也不出短剧、漫剧、漫画
+  static const _categories = [SearchCategory.general, SearchCategory.book, SearchCategory.audio];
+  static const _droppedKinds = {'video', 'manju', 'manga'};
   static const _listViewPreference = 'search_list_view';
   static const _minimumScorePreference = 'search_minimum_score';
 

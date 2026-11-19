@@ -240,7 +240,11 @@ class _ReaderMoreSettingsSheetState
       if (_shows(ReaderBehaviorCategory.theme) &&
           (widget.einkOverride || value.themePreset == ReaderThemePreset.eink))
         _einkRefreshRow(),
-      // 墨卓精简版：没有听书、改编剧两组
+      if (_shows(ReaderBehaviorCategory.listening)) ...[
+        if (_compactForm) const ReaderSettingsDivider(),
+        _listeningSection(),
+      ],
+      // 墨卓精简版：没有改编剧一组
       if (_shows(ReaderBehaviorCategory.operations)) ...[
         const ReaderSettingsDivider(),
         ReaderSettingsNavRow(

@@ -132,7 +132,25 @@ class SettingsPage extends StatelessWidget {
           ),
         ],
       ),
-      // 墨卓精简版：没有听书、短剧两组
+      SettingsCategory(
+        icon: SettingsCategoryIcons.listening,
+        title: '听书',
+        subtitle: '后台播放、通知栏控制与系统朗读',
+        items: [
+          _backgroundAudioItem(),
+          if (!isMediaDesktop) _audioRateEngineItem(),
+          SettingsItem(
+            icon: CupertinoIcons.mic,
+            title: '系统朗读',
+            subtitle: '选择 TTS 引擎与语速，支持本地书',
+            onTap: (context, _) => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SystemTtsSettingsPage()),
+            ),
+          ),
+        ],
+      ),
+      // 墨卓精简版：没有短剧一组
       SettingsCategory(
         icon: SettingsCategoryIcons.data,
         title: '数据',
@@ -141,7 +159,7 @@ class SettingsPage extends StatelessWidget {
           SettingsItem(
             icon: Icons.sync,
             title: '多端同步',
-            subtitle: '仅同步番茄收藏和阅读记录',
+            subtitle: '仅同步番茄收藏和阅读、听书记录',
             onTap: (context, _) => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const MultiDeviceSyncPage()),

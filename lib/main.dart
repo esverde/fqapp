@@ -206,6 +206,8 @@ Future<void> _loadLocalData() async {
       await RankCache.instance.warmUp();
       // RankCache 自己把「不可用」当成「没有缓存」处理。
     }),
+    // 听书音频离线记录箱：只在就绪时才查离线命中。
+    optional(HiveAudioDownloadStore.instance.warmUp),
     // AI 设置/缓存/反馈箱：失败只让 AI 功能退化，不能拖住阅读。
     optional(AiReadingController.instance.init),
     // 主题样式与 SharedPreferences 一并并行：两者都是启动链上的必要项，
@@ -220,6 +222,20 @@ Future<void> _loadLocalData() async {
       await sync.initialize();
     }),
   );
+  // 听书后台播放开关：异步读取 SharedPreferences，失败退化为默认开启。
+  unawaited(AudioPreferences.instance.load());
+  // 离线缓存的网络门：断网/只剩计费链路时自动暂停听书下载队列，半成品保留。
+  try {
+    Connectivity().onConnectivityChanged.listen((results) {
+      final view = foldConnectivity(results);
+      AudioDownloader.instance.updateConnectivity(
+        online: view.online,
+        metered: view.metered,
+      );
+    });
+  } catch (_) {
+    AppLog.w('startup', '连通性监听注册失败，自动暂停下载不可用');
+  }
   // 海报缓存的字节预算清扫：超额时删最旧的图。失败不影响任何页面。
   unawaited(PosterCache.instance.enforceBudget());
   // 小米澎湃 OS 公平运行内存：注册 TRIM/KILL 通道回调。必须在启动时构造，
